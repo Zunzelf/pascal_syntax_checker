@@ -1,17 +1,14 @@
 import os
-
+from rule.pascal_bnf import PascalRule
 # core module
 class SyntaxChecker(object):
-	pof = "" # used for defining position
-	file = "" # used for file placeholder
 
-	def accept(self, inp):
-		if True : 
-			pass
-		else : 
-			raise ValueError("can't accept grammar!")
 	def check(self, file):
-		pass
+		self.file = list(file); # list per line into list per char
+		rule = PascalRule(self.file)
+		rule.first()
+		print "No error detected"
+		return True
 
 # util modules
 def load_file(path) :
@@ -28,4 +25,4 @@ if __name__ == '__main__':
 	sample = load_file(sample_path)
 	sc = SyntaxChecker()
 	print sc.check(sample)
-	print sc.accept(sample)
+

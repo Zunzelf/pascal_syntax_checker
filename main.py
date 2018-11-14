@@ -4,11 +4,12 @@ from rule.pascal_bnf import PascalRule
 class SyntaxChecker(object):
 
 	def check(self, file):
+		# print(file)
 		self.file = list(file); # list per line into list per char
 		rule = PascalRule(self.file)
 		rule.first()
-		print "No error detected"
-		return True
+		# print ()
+		return "No error detected"
 
 # util modules
 def load_file(path) :
@@ -24,5 +25,5 @@ if __name__ == '__main__':
 	sample_path = os.path.join(os.getcwd(), "sample_syntax.pas")
 	sample = load_file(sample_path)
 	sc = SyntaxChecker()
-	print sc.check(sample)
+	print (sc.check(sample))
 

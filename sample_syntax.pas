@@ -1,5 +1,8 @@
+
+
 Program example;
+const
+	a = 25.4E12;
 Begin
-	Write('Hello World. Prepare to learn PASCAL!!');
-	Readln;
-End.
+
+end.

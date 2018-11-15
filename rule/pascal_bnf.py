@@ -52,7 +52,7 @@ class PascalRule(object):
 
 	# rule 9
 	def constant_definition(self):
-		self.constantVar()
+		self.identifier()
 		self.skip_space()
 		self.accept("=")
 		self.skip_space()
@@ -98,12 +98,17 @@ class PascalRule(object):
 			self.accept(petik)
 
 	#for variabel in constant, var, type, and so on 
-	def constantVar(self):
-		while(self.file[self.pof] != " " and self.file[self.pof] != ";" and self.file[self.pof] not in self.symbol):
-			self.pof += 1
+	# def constantVar(self):
+	# 	while(self.file[self.pof] != " " and self.file[self.pof] != ";" and self.file[self.pof] not in self.symbol):
+	# 		self.pof += 1
 
 	def identifier(self): # temporary --> method should be according to the rule of alphanumeric
-		while(self.file[self.pof] != " " and self.file[self.pof] != ";"):
+		if(self.file[self.pof] in self.letter):
+			# self.accept(self.file[self.pof])
+			self.pof += 1
+		else:
+			raise ValueError("can't accept grammar!")
+		while(self.file[self.pof] != " " and self.file[self.pof] != ";" and self.file[self.pof] in self.letter or self.file[self.pof] in self.number or self.file[self.pof] == '_'):
 			self.pof += 1
 
 	def program_content(self): # still place holder

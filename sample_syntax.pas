@@ -2,7 +2,6 @@
 
 Program example;
 const
-	a = 25.4E12;
+x = '15.116E15';
 Begin
-
 end.

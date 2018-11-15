@@ -9,6 +9,7 @@ class SyntaxChecker(object):
 		rule = PascalRule(self.file)
 		rule.first()
 		# print ()
+		print(rule.pof)
 		return "No error detected"
 
 # util modules

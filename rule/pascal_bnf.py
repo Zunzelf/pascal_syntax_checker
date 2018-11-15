@@ -14,7 +14,7 @@ class PascalRule(object):
 			self.pof += 1 # read next char
 		else : 
 			# raise ValueError("can't accept grammar! value= "+inp+", char: "+self.file[self.pof].lower()+", pointer position: "+str(self.pof)+"\n ")
-			raise ValueError("can't accept grammar! '"+inp+"' expected, '"+self.file[self.pof]+"' found")
+			raise ValueError("can't accept grammar! '"+inp+"' expected, '"+self.file[self.pof]+"' found. position: "+str(self.pof))
 
 			
 	# for the sake of the beauty of the code~
@@ -29,6 +29,7 @@ class PascalRule(object):
 		self.program_name()
 		self.skip_space()
 		self.program_content()
+		self.accept('.')
 
 	# part 1 of the BnF : 
 	def program_name(self):
@@ -42,7 +43,8 @@ class PascalRule(object):
 	def constant_definition_part(self):
 		if(self.file[self.pof].lower() == 'c') and (self.file[self.pof+2].lower()=='n') and (self.file[self.pof+3].lower() == 's'):
 			self.accept_sequence("const")
-			self.accept(" ")
+			# while(not self.cek(self.file[self.pof].lower(),self.file[self.pof+1].lower(),self.file[self.pof+2].lower(),self.file[self.pof+3].lower())):
+			self.skip_space()
 			self.constant_definition()
 			self.accept(";")
 
@@ -51,13 +53,32 @@ class PascalRule(object):
 		while(self.file[self.pof] == " "):
 			self.accept(" ")
 
+	# ala-ala dikit cek reserved word (ternyata gagal)
+	# def cek(self,char1,char2,char3,char4):
+	# 	if char1 == 'f' and char2 == 'u' and char3 == 'n' and char4 == 'c':
+	# 		return True
+	# 	elif char1 == 'b' and char2 == 'e' and char3=='g' and char4 =='i':
+	# 		return True
+	# 	elif char1 =='t' and char2 == 'y' and char3 == 'p' and char4 =='e':
+	# 		return True
+	# 	elif char1 =='p' and char2 == 'r' and char3 == 'o' and char4 =='c':
+	# 		return True
+	# 	elif char1 =='v' and char2 == 'a' and char3 == 'r' and char4 ==' ':
+	# 		return True
+	# 	elif char1 =='l' and char2 == 'a' and char3 == 'b' and char4 =='e':
+	# 		return True
+	# 	else:
+	# 		return False
+	
 	# rule 8
 	def constant_definition(self):
+		self.skip_space()
 		self.identifier()
 		self.skip_space()
 		self.accept("=")
 		self.skip_space()
 		self.constant()
+
 
 	# rule 9
 	def constant(self):
@@ -88,6 +109,135 @@ class PascalRule(object):
 		elif self.file[self.pof] == '"' or self.file[self.pof] == "'":
 			self.string()
 	
+	# variable declaration part 
+	def variable_declaration_part(self):
+		if(self.file[self.pof].lower() == 'v' and self.file[self.pof+1].lower() == 'a' and self.file[self.pof+2].lower() == 'r'):
+			self.accept_sequence("var")
+			self.variable_declaration()
+			self.accept(";")
+			# note: belum repeat
+
+	# variable declaration
+	def variable_declaration(self):
+		self.skip_space()
+		self.identifier()
+		self.skip_space()
+		if self.file[self.pof] == ',':
+			while(self.file[self.pof] != ':'):
+				# simple repeat is okay
+				self.skip_space()
+				self.accept(',')
+				self.skip_space()
+				self.identifier()
+		self.accept(':')
+		# bagian teza
+		self.skip_space()
+		self.identifier()
+
+	# procedure and functoin declaration part
+	def proc_func_declare_part(self):
+		self.pro_func_declare()
+
+	# proc and func declaration
+	def pro_func_declare(self):
+		if(self.file[self.pof].lower() == 'p' and self.file[self.pof+1].lower() == 'r' and self.file[self.pof+3].lower() == 'c' ):
+			# bagian teza
+			self.procedure_declararation()
+			self.skip_space()
+			self.accept(';')
+		elif self.file[self.pof].lower() == 'f' and self.file[self.pof+1].lower() == 'u' and self.file[self.pof+2].lower() == 'n' and self.file[self.pof+3].lower() == 'c':
+			self.function_declaration()
+			self.skip_space()
+			self.accept(';')
+
+	# procedure heading
+	def procedure_heading(self):
+		self.accept_sequence("procedure")
+		self.identifier()
+		if(self.file[self.pof] == '('):
+			self.accept('(')
+			# ini di cek tolong repeatnya
+			self.formal_parameter_section()
+			if(self.file[self.pof] == ';'):
+				while(self.file[self.pof] != ')'):
+					self.accept(';')
+					self.skip_space()
+					self.formal_parameter_section()
+			# harusnya ada repeat disini
+			self.accept(')')
+		self.accept(';')
+	
+	# formal parameter section
+	def formal_parameter_section(self):
+		if(self.file[self.pof].lower() == 'v' and self.file[self.pof+1].lower() == 'a' and self.file[self.pof+2].lower() == 'r'):
+			self.accept_sequence('var')
+		# di dokumentasi tulisannya parameter grup, tapi struktur = variable declaration
+		self.skip_space()
+		self.variable_declaration()
+
+	# function
+	def function_declaration(self):
+		self.function_heading()
+		self.skip_space()
+		self.program_content()
+	
+	# function heading
+	def function_heading(self):
+		self.skip_space()
+		self.accept_sequence("function")
+		self.skip_space()
+		self.identifier()
+		self.skip_space()
+		if(self.file[self.pof] == '('):
+			self.accept('(')
+			# ini di cek tolong repeatnya
+			self.formal_parameter_section()
+			if(self.file[self.pof] == ';'):
+				while(self.file[self.pof] != ')'):
+					self.accept(';')
+					self.skip_space()
+					self.formal_parameter_section()
+			# harusnya ada repeat disini
+			self.accept(')')
+		self.accept(':')
+		self.identifier()
+		self.accept(';')
+
+	# rel opr ext
+	def rel_opr_ext(self):
+		if self.file[self.pof] == '=':
+			self.accept('=')
+		elif self.file[self.pof] == '>':
+			self.accept('>')
+
+	# simple expression
+	def simple_expression(self):
+		if self.file[self.pof] in self.sign:
+			self.accept(self.file[self.pof])
+		elif self.file[self.pof].lower() == 'o' and self.file[self.pof].lower() == 'r':
+			self.accept_sequence("or") 
+		self.term()
+
+	# multiply operator
+	def multiply_operator(self):
+		if self.file[self.pof] == '*':
+			self.accept('*')
+		elif self.file[self.pof] == '/':
+			self.accept('/')
+		elif self.file[self.pof].lower() == 'd' and self.file[self.pof+1].lower() == 'i' and self.file[self.pof+2] == 'v':
+			self.accept_sequence('div')
+		elif self.file[self.pof].lower() == 'm' and self.file[self.pof+1].lower() == 'o' and self.file[self.pof+2] == 'd':
+			self.accept_sequence("mod")
+		elif self.file[self.pof].lower() == 'a' and self.file[self.pof+1].lower() == 'n' and self.file[self.pof+2] == 'd':
+			self.accept_sequence("and")
+
+	# unsigned constant
+	def unsigned_constant(self):
+		if self.file[self.pof] == "'" or self.file[self.pof] == '"':
+			self.string()
+		else:
+			self.number()
+
 	# for identifier, naming purpose
 	def identifier(self): 
 		self.letter()
@@ -122,12 +272,18 @@ class PascalRule(object):
 				self.number()
 
 	def program_content(self): # still place holder
+		self.skip_space()
 		self.constant_definition_part()
+		self.skip_space()
+		self.variable_declaration_part()
+		self.skip_space()
+		self.proc_func_declare_part()
+		self.skip_space()
 		if self.file[self.pof].lower() == 'b' and self.file[self.pof+2].lower() == 'g' and self.file[self.pof+4].lower() == 'n':
 			self.accept_sequence("begin")
 			# for ignore space
 			self.skip_space()
-			self.accept_sequence("end.")
+			self.accept_sequence("end")
 
 	# part 2 of the BnF : 
 

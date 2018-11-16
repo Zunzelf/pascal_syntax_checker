@@ -56,6 +56,25 @@ class PascalRule(object):
         while(self.file[self.pof] == " "):
             self.accept(" ")
 
+    def is_label(self):
+        p = self.pof
+        x = 0
+        if self.file[p] in self.letterList :
+            x = 1
+            while self.file[p] in self.letterList:
+                p += 1
+        elif self.file[p] in self.numberList :
+            x = 1
+            while self.file[p] in self.numberList:
+                p += 1
+        if x == 1 :
+            while self.file[p] == " ":
+                p += 1
+            if self.file[p] == ":":
+                return True
+        else :
+            return False
+
     # rule 1
     def first(self):
         # print("for checking position purpose: ")
@@ -64,6 +83,8 @@ class PascalRule(object):
         self.program_name()
         self.skip_space()
         self.program_content()
+        self.skip_space()
+        self.accept(".")
         return True
 
     # rule 2 
@@ -94,13 +115,12 @@ class PascalRule(object):
     # rule 4
     def program_content(self): # still place holder
             self.label_declaration_part()
+            self.skip_space()
             self.constant_definition_part()
+            self.skip_space()
             self.type_definition_part()
-            if self.file[self.pof].lower() == 'b' and self.file[self.pof+2].lower() == 'g' and self.file[self.pof+4].lower() == 'n':
-                self.accept_sequence("begin")
-                # for ignore space
-                self.skip_space()
-                self.accept_sequence("end.")
+            self.skip_space()
+            self.statement_part()
 
     # rule 5
     def label_declaration_part(self):
@@ -116,6 +136,15 @@ class PascalRule(object):
                     self.identifier()
                     self.skip_space()
             self.accept(";")
+
+    # rule 6
+    def label(self):
+        if self.file[self.pof] in self.letterList :
+            while self.file[self.pof] in self.letterList:
+                self.accept(self.file[self.pof])
+        elif self.file[self.pof] in self.numberList :
+            while self.file[self.pof] in self.numberList:
+                self.accept(self.file[self.pof])
 
     # rule 7
     def constant_definition_part(self):
@@ -165,6 +194,7 @@ class PascalRule(object):
     #rule 15
     def type_definition_part(self):
         if self.check("type"):
+            print "type"
             self.accept_sequence("type")
             self.skip_space()
             self.type_definition()
@@ -179,6 +209,8 @@ class PascalRule(object):
                     raise ValueError("can't accept grammar! 'begin' expected")
         if (self.file[self.pof] == "$") :
             raise ValueError("can't accept grammar! 'begin' expected")
+
+        print "type succeed"
 
     # rule 16
     def type_definition(self):
@@ -276,7 +308,6 @@ class PascalRule(object):
         self.skip_space()
         self.accept(";")
         self.skip_space()
-        # print ">>>>", self.check()
         while (not self.check("end;")) and (not self.check("end ")):  
             self.record_section()
             self.skip_space()
@@ -295,9 +326,7 @@ class PascalRule(object):
         self.accept(":")
         self.skip_space()
         self.type()
-    '''
-    27. <variant type>              ::= case [<tag field>] < identifier> of <variant>; <variant> {;<variant>};
-    '''
+
     # rule 28
     def tag_field(self):
         self.identifier()
@@ -338,13 +367,57 @@ class PascalRule(object):
         self.accept_sequence("file of")
         self.skip_space()
         self.type()
+    ####################
+    # rule 44
+    def statement_part(self):
+        self.compound_statement()
+
+    # rule 45
+    def statement(self):
+        if self.is_label():
+            self.label()
+            self.skip_space()
+            self.accept(":")
+            self.skip_space()
+            self.unlabelled_statement()
+        else :
+            self.unlabelled_statement()
+
+    # rule 46
+    def unlabelled_statement(self):
+        ##misal ada structured statement
+        if self.check("begin"):
+            self.compound_statement()
+        elif self.check("if") or self.check("case"):
+            self.conditional_statement()
+        elif self.check("repeat ") or self.check("while ") or self.check("for "):
+            self.repetitive_statement()
+        elif self.check("with"):
+            pass ############
+        else:
+            self.simple_statement()
+
+    # rule 47
+    def simple_statement(self):
+        if self.check("goto"):
+            self.go_to_statement()
+        else:
+            pass #################
+
+    # rule 50
+    def procedure_ext_statement(self):
+        pass
 
     # rule 51
+    def actual_parameter(self):
+        pass
+
+    # rule 52
     def go_to_statement(self):
         self.accept_sequence("goto")
         self.skip_space()
-        self.numbers()
-
+        self.label()
+#######################################
     # rule 53
     def relational_operator(self):
         p = self.file[self.pof]
@@ -365,7 +438,49 @@ class PascalRule(object):
             self.accept("=")
         elif p == ">":
             self.accept(">")
+    ######################
+    # rule 67
+    def compound_statement(self):
+        if self.check("begin"):
+                self.accept_sequence("begin")
+                self.skip_space()
+                while(not self.check("end")):
+                    self.statement()
+                    self.skip_space()
+                    self.accept(";")
+                    self.skip_space()
+                self.skip_space()
+                self.accept_sequence("end")
 
+
+    # rule 68
+    def conditional_statement(self):
+        pass
+
+    # rule 69
+    def if_statement(self):
+        pass
+
+    # rule 70
+    def case_statement(self):
+        pass
+
+    # rule 71
+    def case_list_element(self):
+        pass
+
+    # rule 72
+    def repetitive_statement(self):
+        pass
+
+    # rule 73
+    def while_statement(self):
+        pass
+
+    # rule 74
+    def repeat_statement(self):
+        pass
+    ######################
     # rule 78
     def identifier(self): 
         print self.file[self.pof]

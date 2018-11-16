@@ -164,7 +164,6 @@ class PascalRule(object):
     
     #rule 15
     def type_definition_part(self):
-        n = 0
         if self.check("type"):
             self.accept_sequence("type")
             self.skip_space()
@@ -172,15 +171,14 @@ class PascalRule(object):
             self.skip_space()
             self.accept(";")
             self.skip_space()
-            n += 1
             while not self.is_command() :
                 self.type_definition()
                 self.accept(";")
                 self.skip_space()
                 if (self.file[self.pof] == "$") :
                     raise ValueError("can't accept grammar! 'begin' expected")
-                n += 1
-        print n
+        if (self.file[self.pof] == "$") :
+            raise ValueError("can't accept grammar! 'begin' expected")
 
     # rule 16
     def type_definition(self):

@@ -403,7 +403,9 @@ class PascalRule(object):
         if self.check("goto"):
             self.go_to_statement()
         else:
-            pass #################
+            self.identifier()
+            self.skip_space()
+            self.variable_or_proc_statement()
 
     # rule 50
     def procedure_ext_statement(self):
@@ -411,7 +413,10 @@ class PascalRule(object):
 
     # rule 51
     def actual_parameter(self):
-        pass
+        if self.file[self.pof] == '"' or  self.file[self.pof] == "'":
+            self.string()
+        else:
+            self.expression()
 
     # rule 52
     def go_to_statement(self):
@@ -439,10 +444,6 @@ class PascalRule(object):
                     self.accept(',')
                     self.skip_space()
             self.accept(')')
-
-    # actual parameter
-    def actual_parameter(self):
-        self.expression()
 
     # expression
     def expression(self):
@@ -548,7 +549,33 @@ class PascalRule(object):
         self.number()
         self.numbers()
     
+    # for statement
+    def for_statement(self):
+        self.accept_sequence("for")
+        self.skip_space()
+        self.identifier()
+        self.skip_space()
+        self.accept_sequence(":=")
+        self.skip_space()
+        self.expression()
+        self.skip_space()
+        self.to_or_downto()
+        self.skip_space()
+        self.accept_sequence("do")
+        self.skip_space()
+        self.statement()
 
+    # to or downto
+    def to_or_downto(self):
+        if self.check("to"):
+            self.accept_sequence("to")
+            self.skip_space()
+            self.expression()
+        elif self.check("downto"):
+            self.accept_sequence("downto")
+            self.skip_space()
+            self.expression()
+    
 #########################################
     # rule 67
     def compound_statement(self):
@@ -611,15 +638,35 @@ class PascalRule(object):
 
     # rule 72
     def repetitive_statement(self):
-        pass
+        if self.check("while"):
+            self.while_statement()
+        elif self.check("repeat"):
+            self.repeat_statement()
+        elif self.check("for"):
+            self.for_statement()
 
     # rule 73
     def while_statement(self):
-        pass
+        self.accept_sequence("while")
+        self.skip_space()
+        self.expression()
+        self.skip_space()
+        self.accept_sequence("do")
+        self.skip_space()
+        self.statement()
 
     # rule 74
     def repeat_statement(self):
-        pass
+        self.accept_sequence("repeat")
+        self.skip_space()
+        while(not self.check("until")):
+            self.statement()
+            self.skip_space()
+            self.accept(";")
+            self.skip_space()
+        self.accept_sequence("until")
+        self.skip_space()
+        self.expression()
     ######################
     # rule 78
     def identifier(self): 

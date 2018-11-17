@@ -4,7 +4,7 @@ x = '15.116E15';
 
 Begin
 	
-	Write('Hello World. Prepare to learn PASCAL!!');
+	Write();
 	Readln;
 
 End.

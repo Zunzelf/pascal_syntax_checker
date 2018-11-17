@@ -3,12 +3,15 @@ from rule.pascal_bnf import PascalRule
 # core module
 class SyntaxChecker(object):
 
-	def check(self, file):
+	def check(self, file, filename = ""):
 		# print(file)
 		self.file = list(file); # list per line into list per char
 		rule = PascalRule(self.file)
-		
-		return rule.first()
+		result = rule.first()
+		if result[0] :
+			return "no error detected"
+		else:
+			return "%s(%d,%d) error : %s"%(filename, result[2], result[1], result[3])
 
 # util modules
 def load_file(path) :
@@ -24,4 +27,4 @@ if __name__ == '__main__':
 	sample_path = os.path.join(os.getcwd(), "sample_syntax.pas")
 	sample = load_file(sample_path)
 	sc = SyntaxChecker()
-	print (sc.check(sample))
+	print (sc.check(sample, os.path.basename(sample_path)))

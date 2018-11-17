@@ -17,8 +17,7 @@ class PascalRule(object):
             self.col += 1
             self.pof += 1 # read next char
         else : 
-            # raise ValueError("can't accept grammar! value= "+inp+", char: "+self.file[self.pof].lower()+", pointer position: "+str(self.pof)+"\n ")
-            self.msg = "error at (",self.col,", ",self.line,") : '"+inp+"' expected, '"+self.file[self.pof]+"' found"
+            self.msg = "'"+inp+"' expected, '"+self.file[self.pof]+"' found"
             raise ValueError()      
     # for the sake of the beauty of the code~
     def accept_sequence(self, sequence):
@@ -548,7 +547,6 @@ class PascalRule(object):
             self.accept('>')
     # rule 55 !!! ga ada konstanta !!! problem
     def simple_expression(self):
-        print "aaaaaaaaa"
         if self.file[self.pof] in self.sign:
             self.accept(self.file[self.pof])
         elif self.check("or"):
@@ -768,7 +766,6 @@ class PascalRule(object):
         self.statement()
     # rule 77
     def identifier(self): 
-        print self.file[self.pof]
         self.letter()
         while(self.file[self.pof] in self.letterList or self.file[self.pof] in self.numberList):
             self.letter_or_number()
@@ -793,21 +790,3 @@ class PascalRule(object):
                 self.accept(self.file[self.pof])
         else :
             raise ValueError("can't accept grammar! %s not a number" %self.file[self.pof] )
-
-import os
-if __name__ == '__main__':
-    # util modules
-    def load_file(path) :
-        res = ""    
-        with open(path, "r") as lines :
-            for line in lines :
-                res += ""+line
-            res += " $" # indicate eof
-        return res.replace("\n", " ").replace("\t", "") # a bit prepro for removing newline and tab 
-
-
-    sample_path = os.path.join(os.getcwd(), "sample_syntax.pas")
-    sample = list(load_file(sample_path))
-    rule = PascalRule(sample)
-    print rule.first()
-    # print rule.is_command()

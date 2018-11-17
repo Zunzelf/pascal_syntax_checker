@@ -1,7 +1,6 @@
 program deretfibonacci;
 var a, b, c, d, f : integer;
 begin
-    clrscr;
     writeln('Program Deret Fibonacci ');
     writeln;
     write('Masukkan Jumlah Deret : ');

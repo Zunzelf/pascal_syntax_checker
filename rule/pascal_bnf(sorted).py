@@ -473,7 +473,6 @@ class PascalRule(object):
         if self.check("goto"):
             self.go_to_statement()
         else:
-            print ">>>>>",self.file[self.pof]
             self.identifier()
             self.skip_space()
             self.variable_or_proc_statement()
@@ -537,7 +536,6 @@ class PascalRule(object):
             self.accept('>')
     # rule 55 !!! ga ada konstanta !!! problem
     def simple_expression(self):
-        print "aaaaaaaaa"
         if self.file[self.pof] in self.sign:
             self.accept(self.file[self.pof])
         elif self.check("or"):
@@ -758,7 +756,6 @@ class PascalRule(object):
         self.statement()
     # rule 77
     def identifier(self): 
-        print self.file[self.pof]
         self.letter()
         while(self.file[self.pof] in self.letterList or self.file[self.pof] in self.numberList):
             self.letter_or_number()

@@ -5,11 +5,5 @@ const
 var
     b,dee : string;
     y : integer;
-function nama(a,b:integer; c:string):integer;
 Begin
-
-end;
-
-Begin
-
 end.

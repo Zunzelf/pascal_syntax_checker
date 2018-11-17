@@ -7,9 +7,9 @@ class SyntaxChecker(object):
 		# print(file)
 		self.file = list(file); # list per line into list per char
 		rule = PascalRule(self.file)
-		rule.first()
+		result = rule.first()
 		# print ()
-		return "No error detected"
+		return result[0], result[3]
 
 # util modules
 def load_file(path) :
@@ -18,7 +18,7 @@ def load_file(path) :
 		for line in lines :
 			res += ""+line
 		res += " $" # indicate eof
-	return res.replace("\n", " ").replace("\t", "") # a bit prepro for removing newline and tab
+	return res.replace("\n", "@").replace("\t", "") # a bit prepro for removing newline and tab
 
 if __name__ == '__main__':
 	# load sample file
@@ -26,4 +26,3 @@ if __name__ == '__main__':
 	sample = load_file(sample_path)
 	sc = SyntaxChecker()
 	print (sc.check(sample))
-

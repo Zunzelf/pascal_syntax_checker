@@ -7,9 +7,8 @@ class SyntaxChecker(object):
 		# print(file)
 		self.file = list(file); # list per line into list per char
 		rule = PascalRule(self.file)
-		result = rule.first()
-		# print ()
-		return result[0], result[3]
+		
+		return rule.first()
 
 # util modules
 def load_file(path) :

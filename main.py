@@ -23,7 +23,7 @@ def load_file(path) :
 	return res.replace("\n", "@").replace("\t", "") # a bit prepro for removing newline and tab
 
 if __name__ == '__main__':
-	# load sample file
+	
 	sample_path = os.path.join(os.getcwd(), "sample_syntax.pas")
 	sample = load_file(sample_path)
 	

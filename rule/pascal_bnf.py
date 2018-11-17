@@ -173,7 +173,7 @@ class PascalRule(object):
         if self.file[self.pof] in self.numberList:
             self.number()
             # for real number
-            if(self.file[self.pof] == '.'):
+            if(self.file[self.pof] == '.' and not self.check("..")):
                 self.accept('.')
                 self.number()
                 # real number with e constant
@@ -224,8 +224,7 @@ class PascalRule(object):
             self.accept(petik)
             while(self.file[self.pof] != petik):
                 self.accept(self.file[self.pof])
-            self.accept(petik)
-    # rule 14 <belum ada>     
+            self.accept(petik)  
     # rule 15
     def type_definition_part(self):
         if self.check("type"):
@@ -258,7 +257,7 @@ class PascalRule(object):
     # rule 18 - teza_rev
     def simple_type(self):
         # const .. const
-        if self.file[self.pof].lower() in self.numberList or self.file[self.pof].lower() in self.sign:
+        if self.file[self.pof].lower() in self.numberList or self.file[self.pof].lower() in self.sign or self.file[self.pof].lower() in ["'", '"']:
             self.subrange_type()
         if self.file[self.pof] == "(":
             self.scalar_type()
@@ -797,17 +796,17 @@ class PascalRule(object):
     def with_statement(self):
         self.accept_sequence("with")
         self.skip_space()
-        self.record_variable_list()
+        self.identifier()
         self.skip_space()
         if self.file[self.pof] == ',':
             self.accept(',')
             self.skip_space()
-            self.record_variable
+            self.identifier()
             self.skip_space()
             while (not self.check("do")):
                 self.accept(',')
                 self.skip_space()
-                self.record_variable
+                self.identifier()
                 self.skip_space()
         self.accept_sequence("do")
         self.skip_space()
@@ -815,7 +814,9 @@ class PascalRule(object):
     # rule 77
     def identifier(self): 
         self.letter()
-        while(self.file[self.pof] in self.letterList or self.file[self.pof] in self.numberList):
+        while(self.file[self.pof] in self.letterList or self.file[self.pof] in self.numberList or self.file[self.pof] == "_"):
+            if self.file[self.pof] == "_":
+                self.accept("_")
             self.letter_or_number()
     # rule 78
     def letter_or_number(self):

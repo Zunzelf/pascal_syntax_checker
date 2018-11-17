@@ -20,6 +20,7 @@ function fibonacci(n: integer; n: integer): integer;
 	   
 	   else
 	      fibonacci := fibonacci(n-1) + fibonacci(n-2);
+		
 	end; 	
 procedure findMin(x, y, z: integer; var m: integer);
 	begin
@@ -47,6 +48,24 @@ begin
 		    f :=c;
 		    write(c);
 		    write(' ');
+			 while (d <> f) do 
+			 begin
+			 	writeln('aaa');
+			 end;
     	end;
+		 
+	With TheCustomer do  
+  	begin  
+  		Name := 'Michael';  
+  		Flight := 'PS901';  
+  	end; 
+
+	With A,B,C,D do   	
+	begin  
+  		Name := 'Michael';  
+  		Flight := 'PS901';  
+  	end;
+
+
     readln;
 end.

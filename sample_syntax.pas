@@ -1,7 +1,7 @@
 program deretfibonacci;
 type 
 	Books = record
-	   title:  array ['1'..'50'] of char;
+	   title: packed array ['1'..'50'] of char;
 	   author: array [1..50] of char;
 	   subject: array [1..100] of char;
 	   book_id: integer;
@@ -13,7 +13,6 @@ procedure findMin(x, y, z: integer; var m: integer);
 	      m := x
 	   else
 	      m := y;
-	   
 	   if z <m then
 	      m := z;
 	end;
@@ -39,8 +38,9 @@ procedure findMin(x, y, z: integer; var m: integer);
 	      m := z;
 	end;
 begin
-    writeln(20, 20);
+    writeln(a xor b);
     writeln;
+    a := 'a';
     write('Masukkan Jumlah Deret : ');
     readln(a);
     write('Deret Fibonacci ');
@@ -53,16 +53,16 @@ begin
       'D' : writeln('You passed' );
       'F' : writeln('Better try again' );
 	end;     
-	if( (a < 20) or (a = 20)) then
+	if a < b then
       writeln('a is less than 20' )
    
    	else
-      writeln('a is not less than 20' );
+      writeln('a is not less than 20', a );
     writeln('value of a is : ', a);  
 	writeln('Your grade is  ', grade );
     for b := 1 to a do
     	begin
-		    c := d + c;
+		    c := d + c +d;
 		    d :=f;
 		    f :=c;
 		    write(c);

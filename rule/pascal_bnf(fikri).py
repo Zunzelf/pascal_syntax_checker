@@ -1,7 +1,7 @@
 import sys
-class PascalRule(object):       
+class PascalRule(object):
     def __init__(self, file_inp):
-        self.file = file_inp # used for file placeholder
+        self.file = self.all_lowercase(file_inp) # used for file placeholder
         self.pof = 0 # used for defining position
         self.letterList = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
         self.numberList = ['0','1','2','3','4','5','6','7','8','9']
@@ -9,19 +9,20 @@ class PascalRule(object):
         self.symbol = ['+','-','*','=','<','>','(',')','.',',',';',':','"','{','}']
         self.relational = ['<','>','='] #belum dipake sih, rencana buat type dan var. 
         self.typeReserved = ['integer','real','string','boolean'] #belum dipake sih, rencana buat type dan var.
-
+        (self.col, self.line) = (1, 1)
+        self.newline = "@" 
     ## utility functions
     def accept(self, inp):
-        if inp.lower() == self.file[self.pof].lower() : 
+        if inp == self.file[self.pof] : 
+            self.col += 1
             self.pof += 1 # read next char
         else : 
-            # raise ValueError("can't accept grammar! value= "+inp+", char: "+self.file[self.pof].lower()+", pointer position: "+str(self.pof)+"\n ")
-            raise ValueError("can't accept grammar! '"+inp+"' expected, '"+self.file[self.pof]+"' found")        
+            self.msg = "'"+inp+"' expected, '"+self.file[self.pof]+"' found"
+            raise ValueError()      
     # for the sake of the beauty of the code~
     def accept_sequence(self, sequence):
         for seq in list(sequence):
             self.accept(seq)
-    # chek string
     def check(self, cmd):
         tmp_pof = self.pof
         for x in list(cmd):
@@ -29,7 +30,9 @@ class PascalRule(object):
                 return False
             tmp_pof += 1
         return True
-    # check reserved word for section part
+    # becoz pascal isn't case sensitive *wink*
+    def all_lowercase(self, file):
+        return [x.lower() for x in file]
     def is_command(self):
         # begin
         if self.check("begin") :
@@ -53,9 +56,12 @@ class PascalRule(object):
             return False
     #for ignoring space
     def skip_space(self):
-        while(self.file[self.pof] == " "):
-            self.accept(" ")
-    # is label
+        while(self.file[self.pof] == " " or self.file[self.pof] == self.newline):
+            # self.col += 1
+            if self.file[self.pof] == self.newline:
+                self.line += 1
+                self.col = 1
+            self.accept(self.file[self.pof])
     def is_label(self):
         p = self.pof
         x = 0
@@ -78,16 +84,19 @@ class PascalRule(object):
     ## rules
     # rule 1
     def first(self):
-        self.skip_space()
-        self.program_name()
-        self.skip_space()
-        self.program_content()
-        self.skip_space()
-        self.accept(".")
-        return True
+        try :
+            self.skip_space()
+            self.program_name()
+            self.skip_space()
+            self.program_content()
+            self.skip_space()
+            self.accept(".")
+        except ValueError:
+            return [False, self.col, self.line, self.msg]
+        return [True, self.col, self.line, "no error"]
     # rule 2
     def program_name(self):
-        if (self.file[self.pof].lower() == 'p') and (self.file[self.pof+3].lower() == 'g') :
+        if (self.check("program")) :
             self.accept_sequence("program")
             self.skip_space()
             self.identifier()
@@ -118,7 +127,7 @@ class PascalRule(object):
             self.skip_space()
             self.variable_declaration_part()
             self.skip_space()
-            self.proc_func_declare_part()
+            self.pro_func_declare()
             self.skip_space()
             self.statement_part()
     # rule 5
@@ -164,9 +173,17 @@ class PascalRule(object):
         if self.file[self.pof] in self.numberList:
             self.number()
             # for real number
-            if(self.file[self.pof] == '.'):
+            if(self.file[self.pof] == '.' and not self.check("..")):
                 self.accept('.')
-                self.real_number_ext()
+                self.number()
+                # real number with e constant
+                if(self.file[self.pof].lower() == 'e'):
+                    self.accept('e')
+                    if(self.file[self.pof] in self.sign):
+                        self.accept(self.file[self.pof])
+                        self.number()
+                    elif (self.file[self.pof] in self.numberList):
+                        self.number()
         # for signed number
         elif self.file[self.pof] in self.sign:
             self.accept(self.file[self.pof])
@@ -178,12 +195,13 @@ class PascalRule(object):
         # for string or char
         elif self.file[self.pof] == '"' or self.file[self.pof] == "'":
             self.string()    
+        
     # rule 10 -- perbaikan untuk bil real
     def unsigned_number(self):
         self.number()
         if self.file[self.pof] == '.':
             self.real_number_ext()
-    # rule 11 <belum ada>   
+    # rule 11 <belum ada>    
     def real_number_ext(self):
         if self.file[self.pof] == '.':
             self.accept('.')
@@ -198,7 +216,7 @@ class PascalRule(object):
             self.accept(self.file[self.pof])
             self.number()
         else:
-            self.number()
+            self.number()  
     # rule 13
     def string(self):
         if(self.file[self.pof] == '"' or self.file[self.pof] == "'"):
@@ -206,9 +224,7 @@ class PascalRule(object):
             self.accept(petik)
             while(self.file[self.pof] != petik):
                 self.accept(self.file[self.pof])
-            self.accept(petik)
-    # rule 14 <belum ada>     
-        # ga perlu
+            self.accept(petik)  
     # rule 15
     def type_definition_part(self):
         if self.check("type"):
@@ -238,10 +254,10 @@ class PascalRule(object):
             self.identifier()
         else :
             self.simple_type()
-    # rule 18
+    # rule 18 - teza_rev
     def simple_type(self):
         # const .. const
-        if self.file[self.pof].lower() in self.numberList or self.file[self.pof].lower() in self.sign:
+        if self.file[self.pof].lower() in self.numberList or self.file[self.pof].lower() in self.sign or self.file[self.pof].lower() in ["'", '"']:
             self.subrange_type()
         if self.file[self.pof] == "(":
             self.scalar_type()
@@ -395,14 +411,16 @@ class PascalRule(object):
         self.pro_func_declare()
     # rule 36
     def pro_func_declare(self):
-        if(self.check("procedure")):
-            self.procedure_declaration()
+        while (self.check("procedure") or self.check("function")):
+            if(self.check("procedure")):
+                self.procedure_declaration()
+                self.skip_space()
+                self.accept(';')
+            elif self.check("function"):
+                self.function_declaration()
+                self.skip_space()
+                self.accept(';')
             self.skip_space()
-            self.accept(';')
-        elif self.check("function"):
-            self.function_declaration()
-            self.skip_space()
-            self.accept(';')
     # rule 37 <belum ada>
     def procedure_declaration(self):
         self.procedure_heading()
@@ -411,6 +429,7 @@ class PascalRule(object):
     # rule 38
     def procedure_heading(self):
         self.accept_sequence("procedure")
+        self.skip_space()
         self.identifier()
         if(self.file[self.pof] == '('):
             self.accept('(')
@@ -424,28 +443,13 @@ class PascalRule(object):
             # harusnya ada repeat disini
             self.accept(')')
         self.accept(';')    
-    # rule 39
+    # rule 39, 40
     def formal_parameter_section(self):
-        if self.check('var'):
+        if(self.check("var")):
             self.accept_sequence('var')
         # di dokumentasi tulisannya parameter grup, tapi struktur = variable declaration
         self.skip_space()
         self.variable_declaration()
-    # rule 40 <belum ada>
-    def parameter_group(self):
-        self.skip_space()
-        self.identifier()
-        self.skip_space()
-        if self.file[self.pof] == ',':
-            while(self.file[self.pof] != ':'):
-                # simple repeat is okay
-                self.accept(',')
-                self.skip_space()
-                self.identifier()
-                self.skip_space()
-        self.accept(':')
-        self.skip_space()
-        self.identifier()
     # rule 41
     def function_declaration(self):
         self.function_heading()
@@ -453,15 +457,16 @@ class PascalRule(object):
         self.program_content()
     # rule 42
     def function_heading(self):
-        self.skip_space()
         self.accept_sequence("function")
         self.skip_space()
         self.identifier()
         self.skip_space()
         if(self.file[self.pof] == '('):
             self.accept('(')
+            self.skip_space()
             # ini di cek tolong repeatnya
             self.formal_parameter_section()
+            self.skip_space()
             if(self.file[self.pof] == ';'):
                 while(self.file[self.pof] != ')'):
                     self.accept(';')
@@ -470,12 +475,15 @@ class PascalRule(object):
             # harusnya ada repeat disini
             self.accept(')')
         self.accept(':')
+        self.skip_space()
         self.identifier()
+        self.skip_space()
         self.accept(';')
     # rule 43
     def statement_part(self):
         if (not self.check('begin')) :
-            raise ValueError("can't accept grammar! 'begin' expected")
+            self.msg = "can't accept grammar! 'begin' expected"
+            raise ValueError()
         self.compound_statement()
     # rule 44
     def statement(self):
@@ -487,9 +495,9 @@ class PascalRule(object):
             self.unlabelled_statement()
         else :
             self.unlabelled_statement()
-    # rule 45
+    # rule 45, 65
     def unlabelled_statement(self):
-        ##misal ada structured statement
+        ## misal ada structured statement
         if self.check("begin"):
             self.compound_statement()
         elif self.check("if") or self.check("case"):
@@ -497,7 +505,7 @@ class PascalRule(object):
         elif self.check("repeat ") or self.check("while ") or self.check("for "):
             self.repetitive_statement()
         elif self.check("with"):
-            pass ############
+            self.with_statement()
         else:
             self.simple_statement()
     # rule 46
@@ -505,7 +513,6 @@ class PascalRule(object):
         if self.check("goto"):
             self.go_to_statement()
         else:
-            print (">>>>>",self.file[self.pof])
             self.identifier()
             self.skip_space()
             self.variable_or_proc_statement()
@@ -521,11 +528,10 @@ class PascalRule(object):
             self.actual_parameter()
             self.skip_space()
             if self.file[self.pof] == ',':
-                self.accept(',')
-                self.skip_space()
                 while(self.file[self.pof] != ')'):
-                    self.actual_parameter()
                     self.accept(',')
+                    self.skip_space()
+                    self.actual_parameter()
                     self.skip_space()
             self.accept(')')
     # rule 48
@@ -536,32 +542,74 @@ class PascalRule(object):
         self.accept_sequence("goto")
         self.skip_space()
         self.label()
-    # rule 50
+
+# ------------------------------------------------------------------------------------------------------------------------      
+    # rule 50 new
     def expression(self):
+        # kalau dia adalah factor = turunan dari math expression
+        if self.file[self.pof] in self.sign or self.file[self.pof] == '(' or self.file[self.pof] == '[' or self.file[self.pof] in self.letterList or self.file[self.pof] in self.numberList or self.check("not"):
+            self.math_expression()
+            self.skip_space()
+            if self.file[self.pof] in self.relational:
+                self.comparing_expression()
+        # kalau dia boolean identifier
+        elif self.check("true") or self.check("false"):
+            self.boolean_expression()
+            self.skip_space()
+        elif self.file[self.pof] == '"' or self.file[self.pof] == "'":
+            self.string()
+            self.skip_space()
+            if self.file[self.pof] == '+':
+                self.accept('+')
+                self.skip_space()
+                self.string()
+                self.skip_space()
+                while(self.file[self.pof] == '+'):
+                    self.accept('+')
+                    self.skip_space()
+                    self.string
+                    self.skip_space()
+    # rule 51 new
+    def math_expression(self):
         self.simple_expression()
         self.skip_space()
-        if self.file[self.pof] in self.relational or self.check("in") or self.file[self.pof] in self.sign or self.check("or") or self.file[self.pof] in self.relational:
-            self.relational_or_adding()
-    # rule 51 - 17-0932
-    def relational_or_adding(self):
-        if self.file[self.pof] in self.relational or self.check("in"):
-            self.relational_operator()
+        # kalau ada math operator
+        if self.file[self.pof] in self.sign or self.file[self.pof] == '/' or self.file[self.pof] == '*' or self.check("div") or self.check("mod") or self.check("and") or self.check("or") or self.check("xor") or self.check("shl") or self.check("shr"):
+            self.math_operator()
             self.skip_space()
             self.simple_expression()
             self.skip_space()
-        elif self.file[self.pof] in self.sign or self.check("or"):
-            self.adding_operator
-            self.skip_space()
-            self.simple_expression()
-            self.skip_space()
-    # rule 52 - 17-0932
-    def adding_operator(self):
-        if self.file[self.pof] in self.sign:
+            # selama ada math operator
+            while self.file[self.pof] in self.sign or self.file[self.pof] == '/' or self.file[self.pof] == '*' or self.check("div") or self.check("mod") or self.check("and") or self.check("or") or self.check("xor") or self.check("shl") or self.check("shr"):
+                self.math_operator()
+                self.skip_space()
+                self.simple_expression()
+                self.skip_space()
+    # rule 52 new
+    def math_operator(self):
+        if self.file[self.pof] in self.sign or self.file[self.pof] == '/' or self.file[self.pof] == '*':
             self.accept(self.file[self.pof])
-        elif self.check("or"):
-            self.accept_sequence("or")
-    # rule 53
-    def relational_operator(self):
+        elif self.check("div"):
+            self.accept_sequence("div")
+        elif self.check("mod"):
+            self.accept_sequence("mod")
+        elif self.check("or") or self.check("and") or self.check("xor"):
+            self.boolean_operator()
+        elif self.check("shl"):
+            self.accept_sequence("shl")
+        elif self.check("shr"):
+            self.accept_sequence("shr")
+    # rule 53 new  = plus, ga kepake
+    # rule 54 new
+    def comparing_expression(self):
+        self.comparing_operator()
+        self.skip_space()
+        # kalau ada first dari math expression = simple expression = factor
+        if self.file[self.pof] in self.sign or self.file[self.pof] == '(' or self.file[self.pof] == '[' or self.file[self.pof] in self.letterList or self.file[self.pof] in self.numberList or self.check("not"):
+            self.math_expression()
+            self.skip_space()
+    #  rule 55 new
+    def comparing_operator(self):
         if self.file[self.pof] == '=':
             self.accept('=')
         elif self.file[self.pof] == '<':
@@ -572,62 +620,67 @@ class PascalRule(object):
             self.accept('>')
             if self.file[self.pof] == '=':
                 self.accept('=')
-        elif self.check("in"):
-            self.accept_sequence("in")
-    # rule 54
+    # rule 56 new
     def rel_opr_ext(self):
         if self.file[self.pof] == '=':
             self.accept('=')
         elif self.file[self.pof] == '>':
             self.accept('>')
-    # rule 55 !!! ga ada konstanta !!! problem
+    # rule 57 new
+    def boolean_expression(self):
+        self.boolean_identifier()
+        self.skip_space()
+        self.boolean_operator()
+        self.skip_space()
+        self.boolean_identifier()
+        self.skip_space()
+        if self.check("and") or self.check("or") or self.check("xor"):
+            self.boolean_operator()
+            self.skip_space()
+            self.identifier()
+            self.skip_space()
+            while self.check("and") or self.check("or") or self.check("xor"):
+                self.boolean_operator()
+                self.skip_space()
+                self.identifier()
+                self.skip_space()
+    # rule 58 new
+    def boolean_identifier(self):
+        if self.check("true"):
+            self.accept_sequence("true")
+        elif self.check("false"):
+            self.accept_sequence("false")
+    # rule 59 new
+    def boolean_operator(self):
+        if self.check("and"):
+            self.accept_sequence("and")
+        elif self.check("or"):
+            self.accept_sequence("or")
+        elif self.check("xor"):
+            self.accept_sequence("xor")
+
+    # rule 60 new
     def simple_expression(self):
-        print ("aaaaaaaaa")
         if self.file[self.pof] in self.sign:
             self.accept(self.file[self.pof])
             self.skip_space()
-            self.term()
-        else:
-            self.term()
-            self.skip_space()
-            if self.check("or"):
-                self.accept_sequence("or")
-                self.skip_space()
-                self.term()
-        self.skip_space()
-    # rule 56
-    def term(self):
-        self.factor()
-        self.skip_space()
-        if self.file[self.pof] == '*' or self.file[self.pof] == '/' or self.check("div") or self.check("mod") or self.check("and"):
-            self.multiply_operator()
-            self.skip_space()
             self.factor()
-    # rule 57
-    def multiply_operator(self):
-        if self.file[self.pof] == '*':
-            self.accept('*')
-        elif self.file[self.pof] == '/':
-            self.accept('/')
-        elif self.check("div"):
-            self.accept_sequence("div")
-        elif self.check("mod"):
-            self.accept_sequence("mod")
-        elif self.check("and"):
-            self.accept_sequence("and")
-    # rule 58 // perbaikan ada konstanta
+        else:
+            self.factor()
+        self.skip_space()
+    # rule 61 new 
     def factor(self):
         if self.file[self.pof] in self.letterList:
             self.identifier()
             self.skip_space()
             if self.file[self.pof] == '(':
                 self.function_designator()
-        elif self.file[self.pof] in self.numberList or self.file[self.pof] == '"' or self.file[self.pof] == "'":
-            self.unsigned_constant()
+        elif self.file[self.pof] in self.numberList:
+            self.unsigned_number()
         elif self.file[self.pof] =='(':
             self.accept('(')
             self.skip_space()
-            self.expression()
+            self.simple_expression()
             self.skip_space()
             self.accept(')')
         elif self.file[self.pof] == '[':
@@ -636,15 +689,8 @@ class PascalRule(object):
             self.accept_sequence("not")
             self.skip_space()
             self.factor()
-    # rule 59  <belum ada> problem : variable_ext blm ada
-        # ga perlu kata zil
-    # rule 60
-    def unsigned_constant(self):
-        if self.file[self.pof] == "'" or self.file[self.pof] == '"':
-            self.string()
-        else:
-            self.unsigned_number()
-    # rule 61 
+        self.skip_space()
+    # rule 62 new
     def function_designator(self):
         self.accept('(')
         self.skip_space()
@@ -656,14 +702,14 @@ class PascalRule(object):
             while self.file[self.pof] != ')':
                 self.actual_parameter()
         self.accept(')')
-    # rule 62
+    # rule 63 new
     def set(self):
         self.accept('[')
         self.skip_space()
         self.element_list()
         self.skip_space()
         self.accept(']')    
-    # rule 63
+    # rule 64 new
     def element_list(self):
         self.element()
         self.skip_space()
@@ -675,22 +721,16 @@ class PascalRule(object):
                 self.accept(',')
                 self.skip_space()
                 self.element()
-    # rule 64
+        self.skip_space()
+    # rule 65 new
     def element(self):
         self.identifier()
         if self.accept(".."):
             self.accept_sequence("..")
             self.identifier
-    # rule 65  <belum ada>
-    def structured_statement(self):
-        if self.check("begin"):
-            self.compound_statement()
-        elif self.check("if") or self.check("case"):
-            self.conditional_statement()
-        elif self.check("repeat") or self.check("for") or self.check("while"):
-            self.repetitive_statement()
-        elif self.check("with"):
-            self.with_statement()
+        self.skip_space()
+    # rule 66 new, strucuted statement, digabung sama rule 45.
+# ---------------------------------------------------------------------------------------------------------------------------
     # rule 66
     def compound_statement(self):
         if self.check("begin"):
@@ -798,7 +838,7 @@ class PascalRule(object):
             self.accept_sequence("downto")
             self.skip_space()
             self.expression()
-    # rule 76  ---- dah kusesuaikan
+    # rule 76
     def with_statement(self):
         self.accept_sequence("with")
         self.skip_space()
@@ -807,21 +847,22 @@ class PascalRule(object):
         if self.file[self.pof] == ',':
             self.accept(',')
             self.skip_space()
-            self.identifier
+            self.identifier()
             self.skip_space()
             while (not self.check("do")):
                 self.accept(',')
                 self.skip_space()
-                self.identifier
+                self.identifier()
                 self.skip_space()
         self.accept_sequence("do")
         self.skip_space()
         self.statement()
     # rule 77
     def identifier(self): 
-        print (self.file[self.pof])
         self.letter()
-        while(self.file[self.pof] in self.letterList or self.file[self.pof] in self.numberList):
+        while(self.file[self.pof] in self.letterList or self.file[self.pof] in self.numberList or self.file[self.pof] == "_"):
+            if self.file[self.pof] == "_":
+                self.accept("_")
             self.letter_or_number()
     # rule 78
     def letter_or_number(self):
@@ -830,17 +871,20 @@ class PascalRule(object):
         elif(self.file[self.pof] in self.numberList):
             self.number()
         else :
-            raise ValueError("can't accept grammar!")
+            self.msg = "can't accept grammar!"
+            raise ValueError()
     # rule 79
     def letter(self):
         if (self.file[self.pof].lower() in self.letterList):
             self.accept(self.file[self.pof])
         else :
-            raise ValueError("can't accept grammar! %s not a letter" %self.file[self.pof] )
+            self.msg = "can't accept grammar! %s not a letter" %self.file[self.pof] 
+            raise ValueError()
     # rule 80
     def number(self):
         if (self.file[self.pof] in self.numberList):
             while (self.file[self.pof] in self.numberList):
                 self.accept(self.file[self.pof])
         else :
-            raise ValueError("can't accept grammar! %s not a number" %self.file[self.pof] )
+            self.msg = "can't accept grammar! %s not a number" %self.file[self.pof] 
+            raise ValueError()

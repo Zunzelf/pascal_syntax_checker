@@ -1,12 +1,12 @@
 program deretfibonacci;
 var a, b, c, d, f : integer;
 begin
-    writeln('Program Deret Fibonacci ');
+    writeln(20, 20);
     writeln;
     write('Masukkan Jumlah Deret : ');
     readln(a);
     write('Deret Fibonacci ');
-    d := 0;
+    d := 0.0;
     f := 1;
     c := 0;
     for b := 1 to a do

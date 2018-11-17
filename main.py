@@ -26,5 +26,6 @@ if __name__ == '__main__':
 	# load sample file
 	sample_path = os.path.join(os.getcwd(), "sample_syntax.pas")
 	sample = load_file(sample_path)
+	
 	sc = SyntaxChecker()
 	print (sc.check(sample, os.path.basename(sample_path)))

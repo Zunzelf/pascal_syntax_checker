@@ -547,7 +547,7 @@ class PascalRule(object):
     # rule 50 new
     def expression(self):
         # kalau dia adalah factor = turunan dari math expression
-        if self.file[self.pof] in self.sign or self.file[self.pof] == '(' or self.file[self.pof] == '"' or self.file[self.pof] == "'" or self.file[self.pof] == '[' or self.file[self.pof] in self.letterList or self.file[self.pof] in self.numberList or self.check("not"):
+        if self.file[self.pof] in self.sign or self.file[self.pof] == '(' or self.file[self.pof] == '[' or self.file[self.pof] in self.letterList or self.file[self.pof] in self.numberList or self.check("not"):
             self.math_expression()
             self.skip_space()
             if self.file[self.pof] in self.relational:
@@ -605,7 +605,7 @@ class PascalRule(object):
         self.comparing_operator()
         self.skip_space()
         # kalau ada first dari math expression = simple expression = factor
-        if self.file[self.pof] in self.sign or self.file[self.pof] == '(' or self.file[self.pof] == '"' or self.file[self.pof] == "'" or self.file[self.pof] == '[' or self.file[self.pof] in self.letterList or self.file[self.pof] in self.numberList or self.check("not"):
+        if self.file[self.pof] in self.sign or self.file[self.pof] == '(' or self.file[self.pof] == '[' or self.file[self.pof] in self.letterList or self.file[self.pof] in self.numberList or self.check("not"):
             self.math_expression()
             self.skip_space()
     #  rule 55 new

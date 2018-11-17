@@ -542,32 +542,74 @@ class PascalRule(object):
         self.accept_sequence("goto")
         self.skip_space()
         self.label()
-    # rule 50
+
+# ------------------------------------------------------------------------------------------------------------------------      
+    # rule 50 new
     def expression(self):
+        # kalau dia adalah factor = turunan dari math expression
+        if self.file[self.pof] in self.sign or self.file[self.pof] == '(' or self.file[self.pof] == '"' or self.file[self.pof] == "'" or self.file[self.pof] == '[' or self.file[self.pof] in self.letterList or self.file[self.pof] in self.numberList or self.check("not"):
+            self.math_expression()
+            self.skip_space()
+            if self.file[self.pof] in self.relational:
+                self.comparing_expression()
+        # kalau dia boolean identifier
+        elif self.check("true") or self.check("false"):
+            self.boolean_expression()
+            self.skip_space()
+        elif self.file[self.pof] == '"' or self.file[self.pof] == "'":
+            self.string()
+            self.skip_space()
+            if self.file[self.pof] == '+':
+                self.accept('+')
+                self.skip_space()
+                self.string()
+                self.skip_space()
+                while(self.file[self.pof] == '+'):
+                    self.accept('+')
+                    self.skip_space()
+                    self.string
+                    self.skip_space()
+    # rule 51 new
+    def math_expression(self):
         self.simple_expression()
         self.skip_space()
-        if self.file[self.pof] in self.relational or self.check("in") or self.file[self.pof] in self.sign or self.check("or") or self.file[self.pof] in self.relational:
-            self.relational_or_adding()
-    # rule 51 - 17-0932
-    def relational_or_adding(self):
-        if self.file[self.pof] in self.relational or self.check("in"):
-            self.relational_operator()
+        # kalau ada math operator
+        if self.file[self.pof] in self.sign or self.file[self.pof] == '/' or self.file[self.pof] == '*' or self.check("div") or self.check("mod") or self.check("and") or self.check("or") or self.check("xor") or self.check("shl") or self.check("shr"):
+            self.math_operator()
             self.skip_space()
             self.simple_expression()
             self.skip_space()
-        elif self.file[self.pof] in self.sign or self.check("or"):
-            self.adding_operator
-            self.skip_space()
-            self.simple_expression()
-            self.skip_space()
-    # rule 52 - 17-0932
-    def adding_operator(self):
-        if self.file[self.pof] in self.sign:
+            # selama ada math operator
+            while self.file[self.pof] in self.sign or self.file[self.pof] == '/' or self.file[self.pof] == '*' or self.check("div") or self.check("mod") or self.check("and") or self.check("or") or self.check("xor") or self.check("shl") or self.check("shr"):
+                self.math_operator()
+                self.skip_space()
+                self.simple_expression()
+                self.skip_space()
+    # rule 52 new
+    def math_operator(self):
+        if self.file[self.pof] in self.sign or self.file[self.pof] == '/' or self.file[self.pof] == '*':
             self.accept(self.file[self.pof])
-        elif self.check("or"):
-            self.accept_sequence("or")
-    # rule 53
-    def relational_operator(self):
+        elif self.check("div"):
+            self.accept_sequence("div")
+        elif self.check("mod"):
+            self.accept_sequence("mod")
+        elif self.check("or") or self.check("and") or self.check("xor"):
+            self.boolean_operator()
+        elif self.check("shl"):
+            self.accept_sequence("shl")
+        elif self.check("shr"):
+            self.accept_sequence("shr")
+    # rule 53 new  = plus, ga kepake
+    # rule 54 new
+    def comparing_expression(self):
+        self.comparing_operator()
+        self.skip_space()
+        # kalau ada first dari math expression = simple expression = factor
+        if self.file[self.pof] in self.sign or self.file[self.pof] == '(' or self.file[self.pof] == '"' or self.file[self.pof] == "'" or self.file[self.pof] == '[' or self.file[self.pof] in self.letterList or self.file[self.pof] in self.numberList or self.check("not"):
+            self.math_expression()
+            self.skip_space()
+    #  rule 55 new
+    def comparing_operator(self):
         if self.file[self.pof] == '=':
             self.accept('=')
         elif self.file[self.pof] == '<':
@@ -578,61 +620,67 @@ class PascalRule(object):
             self.accept('>')
             if self.file[self.pof] == '=':
                 self.accept('=')
-        elif self.check("in"):
-            self.accept_sequence("in")
-    # rule 54
+    # rule 56 new
     def rel_opr_ext(self):
         if self.file[self.pof] == '=':
             self.accept('=')
         elif self.file[self.pof] == '>':
             self.accept('>')
-    # rule 55 !!! ga ada konstanta !!! problem
+    # rule 57 new
+    def boolean_expression(self):
+        self.boolean_identifier()
+        self.skip_space()
+        self.boolean_operator()
+        self.skip_space()
+        self.boolean_identifier()
+        self.skip_space()
+        if self.check("and") or self.check("or") or self.check("xor"):
+            self.boolean_operator()
+            self.skip_space()
+            self.identifier()
+            self.skip_space()
+            while self.check("and") or self.check("or") or self.check("xor"):
+                self.boolean_operator()
+                self.skip_space()
+                self.identifier()
+                self.skip_space()
+    # rule 58 new
+    def boolean_identifier(self):
+        if self.check("true"):
+            self.accept_sequence("true")
+        elif self.check("false"):
+            self.accept_sequence("false")
+    # rule 59 new
+    def boolean_operator(self):
+        if self.check("and"):
+            self.accept_sequence("and")
+        elif self.check("or"):
+            self.accept_sequence("or")
+        elif self.check("xor"):
+            self.accept_sequence("xor")
+
+    # rule 60 new
     def simple_expression(self):
         if self.file[self.pof] in self.sign:
             self.accept(self.file[self.pof])
             self.skip_space()
-            self.term()
-        else:
-            self.term()
-            self.skip_space()
-            if self.check("or"):
-                self.accept_sequence("or")
-                self.skip_space()
-                self.term()
-        self.skip_space()
-    # rule 56
-    def term(self):
-        self.factor()
-        self.skip_space()
-        if self.file[self.pof] == '*' or self.file[self.pof] == '/' or self.check("div") or self.check("mod") or self.check("and"):
-            self.multiply_operator()
-            self.skip_space()
             self.factor()
-    # rule 57
-    def multiply_operator(self):
-        if self.file[self.pof] == '*':
-            self.accept('*')
-        elif self.file[self.pof] == '/':
-            self.accept('/')
-        elif self.check("div"):
-            self.accept_sequence("div")
-        elif self.check("mod"):
-            self.accept_sequence("mod")
-        elif self.check("and"):
-            self.accept_sequence("and")
-    # rule 58
+        else:
+            self.factor()
+        self.skip_space()
+    # rule 61 new 
     def factor(self):
         if self.file[self.pof] in self.letterList:
             self.identifier()
             self.skip_space()
             if self.file[self.pof] == '(':
                 self.function_designator()
-        elif self.file[self.pof] in self.numberList or self.file[self.pof] == "'" or self.file[self.pof] == '"':
-            self.unsigned_constant()
+        elif self.file[self.pof] in self.numberList:
+            self.unsigned_number()
         elif self.file[self.pof] =='(':
             self.accept('(')
             self.skip_space()
-            self.expression()
+            self.simple_expression()
             self.skip_space()
             self.accept(')')
         elif self.file[self.pof] == '[':
@@ -641,14 +689,8 @@ class PascalRule(object):
             self.accept_sequence("not")
             self.skip_space()
             self.factor()
-    # rule 59  <belum ada> problem : variable_ext blm ada
-    # rule 60
-    def unsigned_constant(self):
-        if self.file[self.pof] == "'" or self.file[self.pof] == '"':
-            self.string()
-        else:
-            self.unsigned_number()
-    # rule 61 
+        self.skip_space()
+    # rule 62 new
     def function_designator(self):
         self.accept('(')
         self.skip_space()
@@ -660,14 +702,14 @@ class PascalRule(object):
             while self.file[self.pof] != ')':
                 self.actual_parameter()
         self.accept(')')
-    # rule 62
+    # rule 63 new
     def set(self):
         self.accept('[')
         self.skip_space()
         self.element_list()
         self.skip_space()
         self.accept(']')    
-    # rule 63
+    # rule 64 new
     def element_list(self):
         self.element()
         self.skip_space()
@@ -679,12 +721,16 @@ class PascalRule(object):
                 self.accept(',')
                 self.skip_space()
                 self.element()
-    # rule 64
+        self.skip_space()
+    # rule 65 new
     def element(self):
         self.identifier()
         if self.accept(".."):
             self.accept_sequence("..")
             self.identifier
+        self.skip_space()
+    # rule 66 new, strucuted statement, digabung sama rule 45.
+# ---------------------------------------------------------------------------------------------------------------------------
     # rule 66
     def compound_statement(self):
         if self.check("begin"):

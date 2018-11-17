@@ -178,9 +178,11 @@ class PascalRule(object):
         # for string or char
         elif self.file[self.pof] == '"' or self.file[self.pof] == "'":
             self.string()    
-    # rule 10
+    # rule 10 -- perbaikan untuk bil real
     def unsigned_number(self):
         self.number()
+        if self.file[self.pof] == '.':
+            self.real_number_ext()
     # rule 11 <belum ada>   
     def real_number_ext(self):
         if self.file[self.pof] == '.':
@@ -620,7 +622,7 @@ class PascalRule(object):
             self.skip_space()
             if self.file[self.pof] == '(':
                 self.function_designator()
-        elif self.file[self.pof] in self.numberList:
+        elif self.file[self.pof] in self.numberList or self.file[self.pof] == '"' or self.file[self.pof] == "'":
             self.unsigned_constant()
         elif self.file[self.pof] =='(':
             self.accept('(')

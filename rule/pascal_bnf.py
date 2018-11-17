@@ -9,12 +9,12 @@ class PascalRule(object):
         self.symbol = ['+','-','*','=','<','>','(',')','.',',',';',':','"','{','}']
         self.relational = ['<','>','='] #belum dipake sih, rencana buat type dan var. 
         self.typeReserved = ['integer','real','string','boolean'] #belum dipake sih, rencana buat type dan var.
-        (self.col, self.line) = (0, 0)
+        (self.col, self.line) = (1, 1)
         self.newline = "@" 
     ## utility functions
     def accept(self, inp):
         if inp == self.file[self.pof] : 
-            self.col
+            self.col += 1
             self.pof += 1 # read next char
         else : 
             # raise ValueError("can't accept grammar! value= "+inp+", char: "+self.file[self.pof].lower()+", pointer position: "+str(self.pof)+"\n ")
@@ -58,10 +58,10 @@ class PascalRule(object):
     #for ignoring space
     def skip_space(self):
         while(self.file[self.pof] == " " or self.file[self.pof] == self.newline):
-            self.col += 1
+            # self.col += 1
             if self.file[self.pof] == self.newline:
                 self.line += 1
-                self.col = 0
+                self.col = 1
             self.accept(self.file[self.pof])
     def is_label(self):
         p = self.pof

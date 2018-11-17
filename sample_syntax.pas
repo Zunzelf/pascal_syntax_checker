@@ -1,4 +1,11 @@
 program deretfibonacci;
+type 
+	Books = record
+	   title:  array ['1'..'50'] of char;
+	   author: array [1..50] of char;
+	   subject: array [1..100] of char;
+	   book_id: integer;
+	end;
 var a, b, c, d, f : integer;
 procedure findMin(x, y, z: integer; var m: integer);
 	begin
@@ -20,7 +27,6 @@ function fibonacci(n: integer; n: integer): integer;
 	   
 	   else
 	      fibonacci := fibonacci(n-1) + fibonacci(n-2);
-		
 	end; 	
 procedure findMin(x, y, z: integer; var m: integer);
 	begin
@@ -40,7 +46,20 @@ begin
     write('Deret Fibonacci ');
     d := 0.0;
     f := 1;
-    c := 0;
+    c := 0; 
+    case (grade) of
+      'A' : writeln('Excellent!' );
+      'B', 'C': writeln('Well done' );
+      'D' : writeln('You passed' );
+      'F' : writeln('Better try again' );
+	end;     
+	if( (a < 20) or (a = 20)) then
+      writeln('a is less than 20' )
+   
+   	else
+      writeln('a is not less than 20' );
+    writeln('value of a is : ', a);  
+	writeln('Your grade is  ', grade );
     for b := 1 to a do
     	begin
 		    c := d + c;
@@ -48,24 +67,7 @@ begin
 		    f :=c;
 		    write(c);
 		    write(' ');
-			 while (d <> f) do 
-			 begin
-			 	writeln('aaa');
-			 end;
     	end;
-		 
-	With TheCustomer do  
-  	begin  
-  		Name := 'Michael';  
-  		Flight := 'PS901';  
-  	end; 
-
-	With A,B,C,D do   	
-	begin  
-  		Name := 'Michael';  
-  		Flight := 'PS901';  
-  	end;
-
-
     readln;
+
 end.

@@ -8,6 +8,7 @@ eggs/
 .eggs/
 *.egg-info/
 ENV/
+rule/pascal_bnf_exp.py
 env/
 htmlcov/
 .hypothesis/

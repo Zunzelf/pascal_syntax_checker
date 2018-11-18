@@ -1,11 +1,34 @@
 program deretfibonacci;
-type 
-	Books = record
-	   title: packed array ['1'..'50'] of char;
-	   author: array [1..50] of char;
-	   subject: array [1..100] of char;
-	   book_id: integer;
-	end;
+ type
+  UkPolozka = ^Polozka;
+  UkHodnota = ^Hodnota;
+  TypUdaj = (typretez, typcele, typrealne, typlogik, typpole, typobjekt);
+ 
+  VarZaznam = record
+      case Uda9j: TypUdaj of        
+        typretez:  (case retez: TypUdaj of
+            typcele:   (celeng: word);
+        ) 
+        ;
+        typcele:   (cele: word);
+        typrealne: (realne: single);
+        typlogik:  (logik: boolean);
+        typpole:   (pole: UkHodnota);
+        typobjekt: (objekt: UkPolozka);
+     end
+     ;
+ Polozka = record
+    Nazev: string;
+    Hodn:  (askus, bakus);
+    Dalsi: UkPolozka
+ end;
+
+
+ Hodnota = record
+    Hodn:  VarZaznam;
+    Dalsi: UkHodnota     
+ end;
+ 
 var a, b, c, d, f : integer;
 procedure findMin(x, y, z: integer; var m: integer);
 	begin
@@ -53,7 +76,7 @@ begin
       'D' : writeln('You passed' );
       'F' : writeln('Better try again' );
 	end;     
-	if not asd then
+	if not ( a > 2) or not (a > a + 0)  then
       writeln('a is less than 20' )
    	else
       writeln('a is not less than 20', a );

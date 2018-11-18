@@ -53,9 +53,8 @@ begin
       'D' : writeln('You passed' );
       'F' : writeln('Better try again' );
 	end;     
-	if a < b then
+	if not asd then
       writeln('a is less than 20' )
-   
    	else
       writeln('a is not less than 20', a );
     writeln('value of a is : ', a);  

@@ -21,8 +21,12 @@ class PascalRule(object):
             raise ValueError()      
     # for the sake of the beauty of the code~
     def accept_sequence(self, sequence):
-        for seq in list(sequence):
-            self.accept(seq)
+        try:
+            for seq in list(sequence):
+                self.accept(seq)
+        except ValueError: 
+            self.msg = "'%s' expected, '%s' found"%(sequence, self.file[self.pof])
+            raise ValueError()  
     def check(self, cmd):
         tmp_pof = self.pof
         for x in list(cmd):
@@ -248,7 +252,7 @@ class PascalRule(object):
         self.skip_space()
     # rule 17
     def type(self):
-        if self.check('array') or self.check('set of') or self.check('file of') or self.check('record') :
+        if self.check('array') or self.check('set of') or self.check('file of') or self.check('record') or self.check('packed'):
             self.structured_file()
         elif self.file[self.pof].lower() in self.letterList:
             self.identifier()
@@ -283,7 +287,7 @@ class PascalRule(object):
         self.constant()
     # rule 21
     def structured_file(self):
-        if self.check('array'):
+        if self.check('array') or self.check('packed'):
             self.array_type()
         elif self.check('set of'):
             self.set_type()
@@ -293,6 +297,9 @@ class PascalRule(object):
             self.record_type()
     # rule 22
     def array_type(self):
+        if self.check('packed'):
+            self.accept_sequence("packed")
+            self.skip_space()
         self.accept_sequence("array")
         self.skip_space()
         self.accept("[")
@@ -309,7 +316,7 @@ class PascalRule(object):
         self.accept_sequence("of")
         self.skip_space()
         self.type()
-    # rule 23
+    # rule 23, 24
     def record_type(self):
         self.accept_sequence("record")
         self.skip_space()
@@ -542,7 +549,7 @@ class PascalRule(object):
         self.accept_sequence("goto")
         self.skip_space()
         self.label()
-
+    
 # ------------------------------------------------------------------------------------------------------------------------      
     # rule 50 new
     def expression(self):
@@ -658,7 +665,6 @@ class PascalRule(object):
             self.accept_sequence("or")
         elif self.check("xor"):
             self.accept_sequence("xor")
-
     # rule 60 new
     def simple_expression(self):
         if self.file[self.pof] in self.sign:
@@ -680,12 +686,12 @@ class PascalRule(object):
         elif self.file[self.pof] =='(':
             self.accept('(')
             self.skip_space()
-            self.simple_expression()
+            self.expression()
             self.skip_space()
             self.accept(')')
         elif self.file[self.pof] == '[':
             self.set()
-        elif self.check("not"):
+        elif self.check("not") or self.check("not"):
             self.accept_sequence("not")
             self.skip_space()
             self.factor()
@@ -731,6 +737,37 @@ class PascalRule(object):
         self.skip_space()
     # rule 66 new, strucuted statement, digabung sama rule 45.
 # ---------------------------------------------------------------------------------------------------------------------------
+    # these are experimental functions
+    def conditions(self):
+        self.condition()
+        self.skip_space()
+        while self.check("or") or self.check("and") or self.check("xor") :
+            self.condition()
+            self.skip_space()
+
+    def condition(self):
+        wrapper = False
+        if self.check("(") :
+            self.accept("(")
+            self.skip_space()
+            wrapper = True
+        if self.check("not ") or self.check("not("):
+            self.accept_sequence("not")
+            self.skip_space()
+        if self.check("true") or self.check("false"):
+            self.boolean_expression()
+        else :
+            # kalau dia adalah factor = turunan dari math expression
+            if self.file[self.pof] in self.sign or self.file[self.pof] == '(' or self.file[self.pof] == '[' or self.file[self.pof] in self.letterList or self.file[self.pof] in self.numberList or self.check("not"):
+                self.math_expression()
+                self.skip_space()
+                if self.file[self.pof] in self.relational:
+                    self.comparing_expression()
+        self.skip_space()
+        if wrapper:
+            self.accept(")")
+        
+# ---------------------------------------------------------------------------------------------------------------------------
     # rule 66
     def compound_statement(self):
         if self.check("begin"):
@@ -749,11 +786,11 @@ class PascalRule(object):
             self.if_statement()
         elif self.check("case"):
             self.case_statement()
-    # rule 68
+    # rule 68 exp
     def if_statement(self):
         self.accept_sequence("if")
         self.skip_space()
-        self.expression()
+        self.conditions() # will be changed
         self.skip_space()
         self.accept_sequence("then")
         self.skip_space()
@@ -792,16 +829,16 @@ class PascalRule(object):
             self.repeat_statement()
         elif self.check("for"):
             self.for_statement()
-    # rule 72
+    # rule 72 exp
     def while_statement(self):
         self.accept_sequence("while")
         self.skip_space()
-        self.expression()
+        self.conditions() # will be changed
         self.skip_space()
         self.accept_sequence("do")
         self.skip_space()
         self.statement()
-    # rule 73
+    # rule 73 exp
     def repeat_statement(self):
         self.accept_sequence("repeat")
         self.skip_space()
@@ -812,7 +849,7 @@ class PascalRule(object):
             self.skip_space()
         self.accept_sequence("until")
         self.skip_space()
-        self.expression()   
+        self.conditions()  # will be changed 
     # rule 74
     def for_statement(self):
         self.accept_sequence("for")

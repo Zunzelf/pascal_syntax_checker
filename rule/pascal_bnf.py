@@ -21,8 +21,12 @@ class PascalRule(object):
             raise ValueError()      
     # for the sake of the beauty of the code~
     def accept_sequence(self, sequence):
-        for seq in list(sequence):
-            self.accept(seq)
+        try:
+            for seq in list(sequence):
+                self.accept(seq)
+        except ValueError: 
+            self.msg = "'%s' expected, '%s' found"%(sequence, self.file[self.pof])
+            raise ValueError()  
     def check(self, cmd):
         tmp_pof = self.pof
         for x in list(cmd):
@@ -683,7 +687,7 @@ class PascalRule(object):
         elif self.file[self.pof] =='(':
             self.accept('(')
             self.skip_space()
-            self.simple_expression()
+            self.expression()
             self.skip_space()
             self.accept(')')
         elif self.file[self.pof] == '[':
@@ -757,7 +761,7 @@ class PascalRule(object):
     def if_statement(self):
         self.accept_sequence("if")
         self.skip_space()
-        self.expression()
+        self.expression() # will be changed
         self.skip_space()
         self.accept_sequence("then")
         self.skip_space()
@@ -800,7 +804,7 @@ class PascalRule(object):
     def while_statement(self):
         self.accept_sequence("while")
         self.skip_space()
-        self.expression()
+        self.expression() # will be changed
         self.skip_space()
         self.accept_sequence("do")
         self.skip_space()
@@ -816,7 +820,7 @@ class PascalRule(object):
             self.skip_space()
         self.accept_sequence("until")
         self.skip_space()
-        self.expression()   
+        self.expression()  # will be changed 
     # rule 74
     def for_statement(self):
         self.accept_sequence("for")

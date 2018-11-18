@@ -1,5 +1,5 @@
 import os
-from rule.pascal_bnf import PascalRule
+from rule.pascal_bnf_exp import PascalRule
 # core module
 class SyntaxChecker(object):
 

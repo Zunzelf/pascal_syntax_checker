@@ -19,6 +19,7 @@ def load_file(path) :
 	with open(path, "r") as lines :
 		for line in lines :
 			res += ""+line
+			print(line)
 		res += " $" # indicate eof
 	return res.replace("\n", "@").replace("\t", "") # a bit prepro for removing newline and tab
 

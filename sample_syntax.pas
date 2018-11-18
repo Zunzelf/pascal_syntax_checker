@@ -10,7 +10,7 @@ program deretfibonacci;
             typcele:   (celeng: word);
         ) 
         ;
-        typcele:   (cele: word);
+        typcele    (cele: word);
         typrealne: (realne: single);
         typlogik:  (logik: boolean);
         typpole:   (pole: UkHodnota);
